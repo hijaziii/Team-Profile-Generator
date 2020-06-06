@@ -5,14 +5,13 @@ const inquirer = require("inquirer");
 const path = require("path");
 const fs = require("fs");
 
+
 const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
-
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!).
+//  Creating questons
 
 const questions = [
   {
@@ -34,13 +33,13 @@ const questions = [
     type: "list",
     message: "Enter your teammate's role?",
     choices: ["Manager", "Engineer", "Intern"],
-    name: "role"
+    name: "job"
   }
 ];
 
 // Prompt manager question.
 
-const managerQuestion = {
+const managerQ = {
   type: "input",
   message: "Enter your manager's office number?",
   name: "officenumber"
@@ -48,7 +47,7 @@ const managerQuestion = {
 
 // Prompt engineer question.
 
-const engineerQuestion = {
+const engineerQ = {
   type: "input",
   message: "Enter your engineer's github username?",
   name: "github"
@@ -56,7 +55,7 @@ const engineerQuestion = {
 
 // Prompt intern question.
 
-const internQuestion = {
+const internQ = {
   type: "input",
   message: "Enter your intern's school name?",
   name: "school"
@@ -68,7 +67,7 @@ const addOptions = {
   type: "list",
   message: "Would you like to add more team members?",
   choices: ["yes", "no"],
-  name: "restart"
+  name: "redo"
 };
 
 //This Array will hold answers.
@@ -78,41 +77,55 @@ const employeeArray = [];
 // This fuction will prompt the questions and deconstruct responses.
 
 async function init() {
-  const userResponse = await inquirer.prompt(questions);
-  const { name, id, email, role } = userResponse;
+  const userRes = await inquirer.prompt(questions);
+  const { name, id, email, job } = userRes;
 
-  // If role is  Manager, prompt the question.
-  // Creating a new manager with name, id, email and officeNumber response and pushing the manger constructor object in to employeeArray.
-  // Creating a new Engineer with name, id, email and github username response and pushing the Enginner constructor object in to employeeArray.
-  // Creating a new Inter with name, id, email and school name response and pushing the Intern constructor object in to employeeArray.
 
-  if (role === "Manager") {
-    const officeNumber = await inquirer.prompt(managerQuestion);
+  // If job is Manager, creat a new Manager with (name, id, email and officeNumber) response and pushing the manager constructor object in to employeeArray.
+  // If job is Engineer creat a new Engineer with (name, id, email and github) response and pushing the Enginner constructor object in to employeeArray.
+  // If job is Inter creat a new Intern with (name, id, email and school) response and pushing the Intern constructor object in to employeeArray.
+
+  if (job === "Manager") {
+    const number = await inquirer.prompt(managerQ);
+    const officeNumber = number.officenumber
     const employee = new Manager(name, id, email, officeNumber);
     employeeArray.push(employee);
   }
-  else if (role === "Engineer") {
-    const github = await inquirer.prompt(engineerQuestion);
+  else if (job === "Engineer") {
+    const git = await inquirer.prompt(engineerQ);
+    const github = git.github
     const employee = new Engineer(name, id, email, github);
     employeeArray.push(employee);
   }
-  else if (role === "Intern") {
-    const school = await inquirer.prompt(internQuestion);
+  else if (job === "Intern") {
+    const internSchool = await inquirer.prompt(internQ);
+    const school = internSchool.school
     const employee = new Intern(name, id, email, school);
     employeeArray.push(employee);
   }
 
   //If user wants to add another member, answers will go to employeeArray and users will be prompted with questions again. When finished answers will go to employeeArray and not futher action will be made.  
 
-  const restartQuestions = await inquirer.prompt(addOptions);
-  const {restart } = restartQuestions;
+  const redoQ = await inquirer.prompt(addOptions);
+  const { redo } = redoQ;
 
-  if (restart === "yes") {
+  if (redo === "yes") {
     init();
-  } 
-  else {
-    return console.log(employeeArray);
-  };
+  }
 
+  else {
+    const html = await render(employeeArray);
+    fs.writeFile(outputPath, html, function (err) {
+      if (err) {
+        return console.log(err);
+      }
+
+    });
+  }
 };
+
 init();
+
+
+
+

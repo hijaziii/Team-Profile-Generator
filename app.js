@@ -89,6 +89,7 @@ async function init() {
     const number = await inquirer.prompt(managerQ);
     const officeNumber = number.officenumber
     const employee = new Manager(name, id, email, officeNumber);
+    
     employeeArray.push(employee);
   }
   else if (job === "Engineer") {
